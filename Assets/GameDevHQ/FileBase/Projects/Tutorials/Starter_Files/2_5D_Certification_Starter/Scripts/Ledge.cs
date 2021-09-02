@@ -5,7 +5,10 @@ using UnityEngine;
 public class Ledge : MonoBehaviour
 {
     [SerializeField]
-    private Vector3 _handPos, _standPos;
+    private GameObject _handPosObject;
+    [SerializeField]
+    private GameObject _standPosObject;
+    
 
     private void OnTriggerEnter(Collider other)
     {
@@ -14,13 +17,13 @@ public class Ledge : MonoBehaviour
             Player player = other.transform.parent.GetComponent<Player>();
             if (player != null)
             {
-                player.GrabLedge(_handPos, this);
+                player.GrabLedge(_handPosObject, this);
             }
         }
     }
 
-    public Vector3 GetStandPos()
+    public GameObject GetStandPos()
     {
-        return _standPos;
+        return _standPosObject;
     }
 }

@@ -93,20 +93,20 @@ public class Player : MonoBehaviour
         _controller.Move(_velocity * Time.deltaTime);
     }
 
-    public void GrabLedge(Vector3 handPos, Ledge currentLedge)
+    public void GrabLedge(GameObject handPos, Ledge currentLedge)
     {
         _controller.enabled = false;
         _anim.SetBool("GrabLedge", true);
         _anim.SetFloat("Speed", 0f);
         _anim.SetBool("Jumping", false);
         _onLedge = true;
-        transform.position = handPos;
+        transform.position = handPos.transform.position;
         _activeLedge = currentLedge;
     }
 
     public void ClimbUpComplete()
     {
-        transform.position = _activeLedge.GetStandPos();
+        transform.position = _activeLedge.GetStandPos().transform.position;
         _anim.SetBool("GrabLedge", false);
         _controller.enabled = true;
     }
