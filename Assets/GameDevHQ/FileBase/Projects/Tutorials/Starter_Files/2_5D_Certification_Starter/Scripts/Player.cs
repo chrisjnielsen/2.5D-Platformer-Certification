@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Player : MonoBehaviour
 {
 
@@ -21,13 +22,21 @@ public class Player : MonoBehaviour
     private bool _jumping = false;
     private bool _onLedge;
     private Ledge _activeLedge;
-    
+    private int _coins=0;
+    private UIManager _uiManager;
+
 
     // Start is called before the first frame update
     void Start()
     {
         _controller = GetComponent<CharacterController>();
         _anim = GetComponentInChildren<Animator>();
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+
+        if (_uiManager == null)
+        {
+            Debug.LogError("The UI Manager is NULL");
+        }
 
     }
 
@@ -110,4 +119,11 @@ public class Player : MonoBehaviour
         _anim.SetBool("GrabLedge", false);
         _controller.enabled = true;
     }
+
+    public void AddCoins()
+    {
+        _coins++;
+        _uiManager.UpdateCoinDisplay(_coins);
+    }
+
 }
