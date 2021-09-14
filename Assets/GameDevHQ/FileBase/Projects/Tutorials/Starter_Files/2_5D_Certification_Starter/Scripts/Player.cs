@@ -13,20 +13,22 @@ public class Player : MonoBehaviour
     private float _gravity = 1.0f;
     [SerializeField]
     private float _jumpHeight = 15.0f;
-    private float _yVelocity;
-    private bool _canDoubleJump = false;
-    private Vector3 _direction, _velocity;
+    private Vector3 _direction;
     [SerializeField]
-    private float _horizontalInput;
+    private float _horizontalInput, _verticalInput;
     private Animator _anim;
-    private bool _jumping = false;
+    [SerializeField]
+    private bool _jumping;
     private bool _onLedge;
     private Ledge _activeLedge;
     private int _coins=0;
     private UIManager _uiManager;
+    private Ladder _activeLadder;
+    public bool _onLadder, _ladderExit;
 
+    [SerializeField]
+    private GameObject _model;
 
-    // Start is called before the first frame update
     void Start()
     {
         _controller = GetComponent<CharacterController>();
@@ -37,7 +39,6 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("The UI Manager is NULL");
         }
-
     }
 
     void Update()
@@ -51,55 +52,48 @@ public class Player : MonoBehaviour
                 _anim.SetTrigger("ClimbUp");
             }
         }
-     
     }
 
     void CalculateMovement()
     {
-        _horizontalInput = Input.GetAxisRaw("Horizontal");
-
         if (_controller.isGrounded == true)
         {
+            _horizontalInput = Input.GetAxisRaw("Horizontal");
             _direction = new Vector3(0, 0, _horizontalInput);
-            _velocity = _direction * _speed;
             _anim.SetFloat("Speed", Mathf.Abs(_horizontalInput));
 
             if (_horizontalInput != 0)
             {
-                Vector3 facing = transform.localEulerAngles;
+                Vector3 facing = _model.transform.localEulerAngles;
                 facing.y = _direction.z > 0 ? 0 : 180;
-                transform.localEulerAngles = facing;
+                _model.transform.localEulerAngles = facing;
             }
 
-            if (_jumping == true)
+            if (_jumping)
             {
                 _jumping = false;
-                _anim.SetBool("Jumping", false);
+                _anim.SetBool("Jumping", _jumping);
             }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                _yVelocity = _jumpHeight;
-                _canDoubleJump = true;
+                _direction.y = _jumpHeight;
                 _jumping = true;
-                _anim.SetBool("Jumping", true);
+                _anim.SetBool("Jumping", _jumping);
             }
+        }
+        else if (_onLadder)
+        {
+            transform.rotation = Quaternion.Euler(7f, 0, 0);
+            _verticalInput = Input.GetAxisRaw("Vertical");
+            _direction = new Vector3(0, _verticalInput, 0);
+            _anim.SetFloat("VertiSpeed", _verticalInput);
         }
         else
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (_canDoubleJump == true)
-                {
-                    _yVelocity += _jumpHeight;
-                    _anim.SetBool("DoubleJump", false);
-                    _canDoubleJump = false;
-                }
-            }
-            _yVelocity -= _gravity;
+            _direction.y -= _gravity * Time.deltaTime;
         }
-
-        _velocity.y = _yVelocity;
-        _controller.Move(_velocity * Time.deltaTime);
+        _controller.Move(_direction * _speed * Time.deltaTime);
     }
 
     public void GrabLedge(GameObject handPos, Ledge currentLedge)
@@ -125,5 +119,51 @@ public class Player : MonoBehaviour
         _coins++;
         _uiManager.UpdateCoinDisplay(_coins);
     }
+
+    public void ReachedLadder()
+    {
+        _onLadder = !_onLadder;
+        _anim.SetBool("ReachedLadder", _onLadder);
+    }
+
+    public void ClimbUpLadder(Ladder currentLadder)
+    {
+        _anim.SetTrigger("UseLadder");
+        _controller.enabled = false;
+        _activeLadder = currentLadder;
+    }
+
+    public void LadderComplete()
+    {
+        if (_model.transform.localEulerAngles.y < 60)
+        {
+            transform.position = _activeLadder.GetStandPosR();
+        }
+        else
+        {
+            transform.position = _activeLadder.GetStandPosL();
+        }
+        _anim.SetBool("ReachedLadder", false);
+        _controller.enabled = true;
+        _onLadder = false;
+    }
+
+
+    /*public void RollComplete()
+    {
+        if (_model.transform.localEulerAngles.y < 60)
+        {
+            transform.position = _finishRollPosR.transform.position;
+        }
+        else
+        {
+            transform.position = _finishRollPosL.transform.position;
+        }
+        _controller.enabled = true;
+    }*/
+    
+
+
+
 
 }
