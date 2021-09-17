@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     public bool _onLadder, _ladderExit;
 
     [SerializeField]
-    private GameObject _model;
+    private GameObject _model, _finishRollPosR, _finishRollPosL;
 
     void Start()
     {
@@ -67,6 +67,12 @@ public class Player : MonoBehaviour
                 Vector3 facing = _model.transform.localEulerAngles;
                 facing.y = _direction.z > 0 ? 0 : 180;
                 _model.transform.localEulerAngles = facing;
+                if (Input.GetKeyDown(KeyCode.LeftShift))
+                {
+                    _anim.SetTrigger("Roll");
+                    _controller.enabled = false;
+                }
+
             }
 
             if (_jumping)
@@ -75,9 +81,9 @@ public class Player : MonoBehaviour
                 _anim.SetBool("Jumping", _jumping);
             }
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetButtonDown("Jump"))
             {
-                _direction.y = _jumpHeight;
+                _direction.y += _jumpHeight;
                 _jumping = true;
                 _anim.SetBool("Jumping", _jumping);
             }
@@ -92,7 +98,9 @@ public class Player : MonoBehaviour
         else
         {
             _direction.y -= _gravity * Time.deltaTime;
+            
         }
+        
         _controller.Move(_direction * _speed * Time.deltaTime);
     }
 
@@ -149,7 +157,7 @@ public class Player : MonoBehaviour
     }
 
 
-    /*public void RollComplete()
+    public void RollComplete()
     {
         if (_model.transform.localEulerAngles.y < 60)
         {
@@ -160,7 +168,7 @@ public class Player : MonoBehaviour
             transform.position = _finishRollPosL.transform.position;
         }
         _controller.enabled = true;
-    }*/
+    }
     
 
 
